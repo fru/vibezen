@@ -16,3 +16,7 @@ npx cap init
 npm install @capacitor/android @capacitor/ios
 npx cap add android
 npx cap add ios
+
+
+winget install --id Microsoft.OpenJDK.21 --source winget --accept-package-agreements --accept-source-agreements
+winget install -e --id Google.AndroidStudio
