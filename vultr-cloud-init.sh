@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Use Shared CPU + Location Frankfurt
+# Smallest 2 CPUs & 4GB Ram - should be 20$
+# Disable auto backups
+# Marketplace App: Docker
+# Add this script under cloud init
+
+# Cloudflare add ip to dns type A with name vibe-chat-app
+# Database: http://95.179.161.146:8080/?mssql=database&username=sa&db=DemoDb
+
 # 1. Create the workspace directory
 mkdir -p /app
 cd /app
