@@ -1,0 +1,26 @@
+# Look at compiled outputs - Never commit these
+bin/
+obj/
+
+# Visual Studio / Rider / VS Code cache & settings
+.vs/
+.idea/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Structured log files and build reports
+*.log
+*.blame
+*.rsp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Local development secrets (Safe keeping)
+appsettings.Development.json
+usersecrets.json
