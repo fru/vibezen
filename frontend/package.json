@@ -2,11 +2,12 @@
   "name": "frontend",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host=0.0.0.0",
+    "start:android": "npx cap run android -l --external",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "android-studio": "npx cap open android"
   },
   "private": true,
   "packageManager": "npm@11.12.1",

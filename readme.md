@@ -9,4 +9,10 @@ Initalize angular
 
 npm install -g @angular/cli
 ng new frontend --routing --style=scss
-cd frontend
+
+npm install @capacitor/core @capacitor/cli
+npx cap init
+
+npm install @capacitor/android @capacitor/ios
+npx cap add android
+npx cap add ios
