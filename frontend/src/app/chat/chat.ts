@@ -1,48 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonBackButton,
-  IonTitle,
-  IonContent,
-  IonFooter,
-  IonIcon,
-  IonInput,
-  IonButton,
-  IonAvatar
-} from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import {
-  arrowBack,
-  ellipsisVertical,
-  attach,
-  send,
-  checkmark,
-  checkmarkDone
-} from 'ionicons/icons';
 import { ChatMessage } from './chat.message';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonTitle,
-    IonContent,
-    IonFooter,
-    IonIcon,
-    IonInput,
-    IonButton,
-    IonAvatar
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './chat.html',
   styleUrl: './chat.scss'
 })
@@ -85,10 +49,6 @@ export class ChatComponent {
       status: undefined
     }
   ]);
-
-  constructor() {
-    addIcons({ arrowBack, ellipsisVertical, attach, send, checkmark, checkmarkDone });
-  }
 
   send(): void {
     const text = this.draft().trim();

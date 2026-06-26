@@ -1,3 +1,44 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #ece5dd;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 56px;
+  padding: 0 8px;
+  background: #075e54;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
 .peer-avatar {
   width: 36px;
   height: 36px;
@@ -20,6 +61,8 @@
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  flex: 1;
+  min-width: 0;
 }
 
 .peer-name {
@@ -33,7 +76,9 @@
 }
 
 .chat-content {
-  --background: #ece5dd;
+  flex: 1;
+  overflow-y: auto;
+  background: #ece5dd;
 }
 
 .message-list {
@@ -60,12 +105,12 @@
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
 }
 
-:host ::ng-deep .bubble-row:not(.mine) .bubble {
+.bubble-row:not(.mine) .bubble {
   background: #ffffff;
   border-top-left-radius: 3px;
 }
 
-:host ::ng-deep .bubble-row.mine .bubble {
+.bubble-row.mine .bubble {
   background: #d9fdd3;
   border-top-right-radius: 3px;
 }
@@ -92,28 +137,39 @@
 }
 
 .tick-icon {
-  font-size: 0.85rem;
+  width: 14px;
+  height: 14px;
 }
 
 .tick-icon.read {
   color: #4fc3f7;
 }
 
-.input-toolbar {
-  --background: #f0f0f0;
-  --min-height: 52px;
+.app-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
   padding: 4px 6px;
+  background: #f0f0f0;
 }
 
 .message-input {
-  --background: #ffffff;
-  --color: #111;
-  --placeholder-color: #8a8a8a;
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  color: #111;
+  border: none;
   border-radius: 22px;
-  padding: 4px 14px;
+  padding: 8px 14px;
   font-size: 0.95rem;
+  outline: none;
+}
+
+.message-input::placeholder {
+  color: #8a8a8a;
 }
 
 .send-btn {
-  --color: #075e54;
+  color: #075e54;
 }

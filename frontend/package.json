@@ -3,12 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "start": "ng serve --host=0.0.0.0",
-    "start:android": "cross-env ONESIGNAL_DISABLE_LOCATION=true npx cap run android",
-    "sync": "npx cap sync",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "android-studio": "npx cap open android"
+    "test": "ng test"
   },
   "private": true,
   "packageManager": "npm@11.12.1",
@@ -19,14 +16,6 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "@capacitor/android": "^8.4.1",
-    "@capacitor/cli": "^8.4.1",
-    "@capacitor/core": "^8.4.1",
-    "@capacitor/ios": "^8.4.1",
-    "@ionic/angular": "^8.8.12",
-    "@ionic/angular-server": "^8.8.12",
-    "@ionic/core": "^8.8.12",
-    "@onesignal/capacitor-plugin": "^1.1.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

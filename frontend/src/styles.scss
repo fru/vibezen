@@ -1,20 +1,18 @@
-@import '@ionic/angular/css/core.css';
-@import '@ionic/angular/css/normalize.css';
-@import '@ionic/angular/css/structure.css';
-@import '@ionic/angular/css/typography.css';
-@import '@ionic/angular/css/display.css';
-
-@import '@ionic/angular/css/padding.css';
-@import '@ionic/angular/css/float-elements.css';
-@import '@ionic/angular/css/text-alignment.css';
-@import '@ionic/angular/css/text-transformation.css';
-@import '@ionic/angular/css/flex-utils.css';
-
-/* Material Design theme overrides for Android feel */
 :root {
-  --ion-background-color: #ece5dd;
-  --ion-toolbar-background: #075e54;
-  --ion-toolbar-color: #ffffff;
-  --ion-color-primary: #075e54;
-  --ion-color-primary-contrast: #ffffff;
+  --app-background: #ece5dd;
+  --toolbar-background: #075e54;
+  --toolbar-color: #ffffff;
+  --primary: #075e54;
+  --primary-contrast: #ffffff;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: var(--app-background);
 }
