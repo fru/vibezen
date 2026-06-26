@@ -3,31 +3,20 @@ import { MessagesComponent } from './messages/messages';
 import { OtherComponent } from './other/other';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'messages', pathMatch: 'full' },
-  { path: 'messages', component: MessagesComponent, title: 'Messages' },
-  {
-    path: 'other/a',
-    component: OtherComponent,
-    data: { title: 'Menu A' },
-    title: 'Menu A',
+  { 
+    path: 'messages', 
+    component: MessagesComponent, 
+    title: 'Nachrichten'
   },
   {
-    path: 'other/b',
+    path: 'filter/rooms',
     component: OtherComponent,
-    data: { title: 'Menu B' },
-    title: 'Menu B',
+    title: 'Zimmer'
   },
   {
-    path: 'other/c',
+    path: 'filter/workflow',
     component: OtherComponent,
-    data: { title: 'Menu C' },
-    title: 'Menu C',
-  },
-  {
-    path: 'other/d',
-    component: OtherComponent,
-    data: { title: 'Menu D' },
-    title: 'Menu D',
+    title: 'Arbeitsablauf'
   },
   { path: '**', redirectTo: 'messages' },
 ];

@@ -1,55 +1,28 @@
 @use '@angular/material' as mat;
 
-@include mat.core();
-
-$vibezen-primary: mat.m2-define-palette(mat.$m2-teal-palette, 700, 500, 800);
-$vibezen-accent: mat.m2-define-palette(mat.$m2-amber-palette, A200, A100, A400);
-$vibezen-warn: mat.m2-define-palette(mat.$m2-red-palette);
-
-$vibezen-font-family: (
-  -apple-system,
-  BlinkMacSystemFont,
-  'Segoe UI',
-  Roboto,
-  Helvetica,
-  Arial,
-  sans-serif,
-);
-
-$vibezen-typography: mat.m2-define-typography-config(
-  $font-family: $vibezen-font-family,
-);
-
-$vibezen-theme: mat.m2-define-light-theme(
-  (
+html {
+  @include mat.theme((
     color: (
-      primary: $vibezen-primary,
-      accent: $vibezen-accent,
-      warn: $vibezen-warn,
+      primary: mat.$azure-palette,
+      theme-type: light,
     ),
-    typography: $vibezen-typography,
-    density: 0,
-  )
-);
-
-@include mat.all-component-typographies($vibezen-theme);
-@include mat.all-component-themes($vibezen-theme);
-
-:root {
-  --app-background: #ece5dd;
-  --toolbar-background: #075e54;
-  --toolbar-color: #ffffff;
-  --primary: #075e54;
-  --primary-contrast: #ffffff;
+    typography: Roboto,
+    density: 0
+  ));
 }
 
-html,
 body {
-  height: 100%;
+  font: var(--mat-sys-body-large);
   margin: 0;
-  font-family: $vibezen-font-family;
+  min-height: 100vh;
+
+  --mat-sidenav-container-background-color: white;
+
+  mat-toolbar {
+    --mat-toolbar-container-background-color: #4551b9;
+    --mat-toolbar-container-text-color: white;
+    --mat-icon-button-icon-color: white;
+  }
+  
 }
 
-body {
-  background: var(--app-background);
-}
