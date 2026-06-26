@@ -1,12 +1,11 @@
-import { Component, Input } from '@angular/core';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  selector: 'app-other',
-  imports: [MatToolbarModule, MatIconModule, MatButtonModule, MatCardModule],
+  selector: 'page-rooms',
+  imports: [MatIconModule, MatButtonModule, MatCardModule],
   template: `
     <div class="content-container">
       <mat-card class="item-card">
@@ -39,6 +38,4 @@ import { MatCardModule } from '@angular/material/card';
     `,
   ],
 })
-export class OtherComponent {
-  @Input() title = 'Other Menu Item';
-}
+export class PageRoomsComponent {}
