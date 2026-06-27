@@ -55,7 +55,6 @@ server {
     }
 
     # Proxy SQLPad (web-based DB management UI)
-    # No trailing slash on proxy_pass — preserves the /db/ prefix for SQLPad's SQLPAD_BASE_URL
     location /db/ {
         proxy_pass http://127.0.0.1:8083;
         proxy_set_header Host $host;
