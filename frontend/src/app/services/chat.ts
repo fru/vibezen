@@ -1,4 +1,4 @@
-import { Injectable, NgZone, effect, inject } from '@angular/core';
+import { Injectable, NgZone, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HubConnectionBuilder, type HubConnection } from '@microsoft/signalr';
@@ -38,6 +38,13 @@ export class ChatService {
   // CONSTRAINT once a set has been added even if empty its not deleted
   private readonly _listeners = new Map<string, Set<RoomListener>>();
 
+  /**
+   * Sum of unread messages across all rooms. Reflected in the document
+   * title so the user can see pending messages even when the tab is in
+   * the background.
+   */
+  readonly totalUnread = signal(0);
+
   constructor() {
     effect((onCleanup) => {
       const userId = this.userService.user();
@@ -57,12 +64,21 @@ export class ChatService {
               this.emit(room, count);
             }
           }
+          this.totalUnread.set(
+            Array.from(this._counts.values()).reduce((sum, n) => sum + n, 0),
+          );
         });
 
         this.connection.start().catch((err) => console.error('SignalR connection failed', err));
       });
 
       onCleanup(() => this.disconnect());
+    });
+
+    // Reflect the total unread count in the document title.
+    effect(() => {
+      const total = this.totalUnread();
+      document.title = total > 0 ? `(${total}) VibeZen` : 'VibeZen';
     });
   }
 
