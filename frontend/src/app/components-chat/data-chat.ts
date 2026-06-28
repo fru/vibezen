@@ -5,6 +5,7 @@ import {
   input,
   signal,
   viewChild,
+  type OnDestroy,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ViewChat } from './view-chat';
@@ -67,7 +68,7 @@ interface ChatMessage {
     `,
   ],
 })
-export class DataChat {
+export class DataChat implements OnDestroy {
   private readonly api = inject(ChatService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly userService = inject(UserService);
@@ -79,6 +80,25 @@ export class DataChat {
 
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly draft = signal('');
+
+  /**
+   * Whether the window is currently "active" — visible and focused.
+   * `markAsRead` is only fired while this is true so background tabs
+   * don't clear unread counts the user hasn't actually seen.
+   */
+  private readonly windowActive = signal(this.isWindowActive());
+
+  private readonly visibilityHandler = (): void => {
+    const active = this.isWindowActive();
+    if (active && !this.windowActive()) {
+      // User just returned to the window — mark the current room as read
+      // if messages are already loaded.
+      this.windowActive.set(true);
+      this.markCurrentRoomRead();
+    } else {
+      this.windowActive.set(active);
+    }
+  };
 
   constructor() {
     // Reload messages whenever the room or current user changes.
@@ -107,6 +127,31 @@ export class DataChat {
       });
       onCleanup(() => unsubscribe());
     });
+
+    // Track window visibility/focus so we only mark as read when active.
+    window.addEventListener('visibilitychange', this.visibilityHandler);
+    window.addEventListener('focus', this.visibilityHandler);
+    window.addEventListener('blur', this.visibilityHandler);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('visibilitychange', this.visibilityHandler);
+    window.removeEventListener('focus', this.visibilityHandler);
+    window.removeEventListener('blur', this.visibilityHandler);
+  }
+
+  private isWindowActive(): boolean {
+    return !document.hidden && document.hasFocus();
+  }
+
+  /** Marks the current room as read, but only if the window is active. */
+  private markCurrentRoomRead(): void {
+    if (!this.windowActive() || this.messages().length === 0) {
+      return;
+    }
+    const room = this.room();
+    const currentUser = this.userService.user();
+    this.api.markAsRead(room, currentUser).subscribe();
   }
 
   private loadMessages(): void {
@@ -117,8 +162,9 @@ export class DataChat {
         this.messages.set(
           dtos.map((dto) => this.toChatMessage(dto, currentUser)),
         );
-        // Mark the room as read now that the user has the latest messages.
-        this.api.markAsRead(room, currentUser).subscribe();
+        // Mark the room as read now that the user has the latest messages,
+        // but only if they're actually looking at the window.
+        this.markCurrentRoomRead();
       },
       error: () => {
         this.snackBar.open('Failed to load messages', 'Dismiss', {
