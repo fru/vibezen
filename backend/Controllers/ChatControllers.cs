@@ -2,42 +2,44 @@ using App.Data;
 using App.Data.Entities;
 using App.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace App.Controllers;
 
 [ApiController]
-[Route("api/rooms/{room}/[controller]")]
-public class MessagesController : ControllerBase
+[Route("api/rooms/{room}")]
+public class ChatController : ControllerBase
 {
-    private readonly MessageService _messageService;
-    private readonly IHubContext<ChatSignalRHub> _hubContext;
+    private readonly ChatService _chatService;
     private readonly ChatDbContext _db;
 
-    public MessagesController(
-        MessageService messageService,
-        IHubContext<ChatSignalRHub> hubContext,
-        ChatDbContext db)
+    public ChatController(ChatService chatService, ChatDbContext db)
     {
-        _messageService = messageService;
-        _hubContext = hubContext;
+        _chatService = chatService;
         _db = db;
     }
 
     // GET api/rooms/{room}/messages
-    [HttpGet]
+    [HttpGet("messages")]
     public async Task<ActionResult<List<ChatMessageDto>>> GetMessages(string room)
     {
-        var messages = await _messageService.GetMessagesAsync(room);
+        var messages = await _chatService.GetMessagesAsync(room);
         return Ok(messages.Select(ToDto));
     }
 
+    // GET api/rooms/{room}/messages/{id}
+    [HttpGet("messages/{id:guid}")]
+    public async Task<ActionResult<ChatMessageDto>> GetMessage(string room, Guid id)
+    {
+        var message = await _chatService.GetMessageAsync(room, id);
+        return message is null ? NotFound() : Ok(ToDto(message));
+    }
+
     // POST api/rooms/{room}/messages
-    [HttpPost]
+    [HttpPost("messages")]
     public async Task<ActionResult<ChatMessageDto>> SendMessage(string room, [FromBody] SendMessageRequest request)
     {
-        var message = await _messageService.SendMessageAsync(room, request.Username, request.Content);
+        var message = await _chatService.SendMessageAsync(room, request.Username, request.Content, request.Id);
         var dto = ToDto(message);
 
         // Notify every member of this room with refreshed unread counts.
@@ -48,13 +50,27 @@ public class MessagesController : ControllerBase
 
         foreach (var member in memberNames)
         {
-            await ChatSignalRHub.NotifyUserCountsAsync(_hubContext, _messageService, member);
+            await _chatService.NotifyUserCountsAsync(member);
         }
 
         return CreatedAtAction(
-            nameof(SendMessage),
+            nameof(GetMessage),
             new { room, id = message.Id },
             dto);
+    }
+
+    // POST api/rooms/{room}/read
+    [HttpPost("read")]
+    public async Task<IActionResult> MarkRead(string room, [FromBody] MarkReadRequest request)
+    {
+        var marked = await _chatService.MarkRoomAsReadAsync(room, request.Username);
+        if (!marked)
+        {
+            return NotFound(new { status = "not_a_member" });
+        }
+
+        await _chatService.NotifyUserCountsAsync(request.Username);
+        return Ok(new { status = "read" });
     }
 
     private static ChatMessageDto ToDto(ChatMessage message) => new(
@@ -65,30 +81,7 @@ public class MessagesController : ControllerBase
         message.Timestamp);
 }
 
-[ApiController]
-[Route("api/rooms/{room}/read")]
-public class ReadController : ControllerBase
-{
-    private readonly MessageService _messageService;
-    private readonly IHubContext<ChatSignalRHub> _hubContext;
-
-    public ReadController(MessageService messageService, IHubContext<ChatSignalRHub> hubContext)
-    {
-        _messageService = messageService;
-        _hubContext = hubContext;
-    }
-
-    // POST api/rooms/{room}/read
-    [HttpPost]
-    public async Task<IActionResult> MarkRead(string room, [FromBody] MarkReadRequest request)
-    {
-        await _messageService.MarkRoomAsReadAsync(room, request.Username);
-        await ChatSignalRHub.NotifyUserCountsAsync(_hubContext, _messageService, request.Username);
-        return Ok(new { status = "read" });
-    }
-}
-
-public record SendMessageRequest(string Username, string Content);
+public record SendMessageRequest(string Username, string Content, Guid? Id = null);
 
 public record MarkReadRequest(string Username);
 

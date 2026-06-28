@@ -13,6 +13,7 @@ export interface ChatMessageDto {
 }
 
 export interface SendMessageDto {
+  id: string;
   username: string;
   content: string;
 }

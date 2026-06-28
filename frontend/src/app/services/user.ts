@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /**
  * Owns the current user id and keeps it in sync with the `?user=` query
@@ -15,6 +16,7 @@ export class UserService {
 
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Currently active user id. */
   readonly user = signal(UserService.DEFAULT_USER);
@@ -30,9 +32,11 @@ export class UserService {
     }
 
     // Stay in sync with later navigations (back/forward, links, etc.).
-    this.route.queryParams.subscribe((params) => {
-      this.user.set(params['user']?.trim() || UserService.DEFAULT_USER);
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        this.user.set(params['user']?.trim() || UserService.DEFAULT_USER);
+      });
   }
 
   private readUserParam(): string | undefined {

@@ -94,13 +94,18 @@ export class DataChat {
       queueMicrotask(() => this.chat()?.scrollToBottom());
     });
 
-    // Re-fetch messages when the unread count for the current room changes.
-    let lastCount = -1;
-    this.api.onCounts(this.room(), (next) => {
-      if (next !== lastCount) {
-        lastCount = next;
-        this.loadMessages();
-      }
+    // Re-subscribe to unread-count updates whenever the room changes,
+    // and re-fetch messages when the count for the current room changes.
+    effect((onCleanup) => {
+      const room = this.room();
+      let lastCount = -1;
+      const unsubscribe = this.api.onCounts(room, (next) => {
+        if (next !== lastCount) {
+          lastCount = next;
+          this.loadMessages();
+        }
+      });
+      onCleanup(() => unsubscribe());
     });
   }
 
@@ -144,7 +149,7 @@ export class DataChat {
     const room = this.room();
     const user = this.userService.user();
 
-    this.api.sendMessage(room, { username: user, content: text }).subscribe({
+    this.api.sendMessage(room, { id, username: user, content: text }).subscribe({
       next: (dto) => {
         this.messages.update((list) =>
           list.map((m) =>
