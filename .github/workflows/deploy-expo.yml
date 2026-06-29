@@ -1,0 +1,73 @@
+name: Build Mobile Apps
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "vibezen/app.json"
+      - "vibezen/eas.json"
+      - "vibezen/package.json"
+      - "vibezen/package-lock.json"
+      - "vibezen/assets/**"
+      - ".github/workflows/deploy-expo.yml"
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: vibezen/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: vibezen
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Write google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" > vibezen/google-services.json
+
+      - name: Build (preview)
+        run: eas build --profile preview --platform android --non-interactive
+        working-directory: vibezen
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+  ios:
+    name: Build iOS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: vibezen/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: vibezen
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Build (preview)
+        run: eas build --profile preview --platform ios --non-interactive
+        working-directory: vibezen
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
