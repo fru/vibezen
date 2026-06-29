@@ -1,13 +1,5 @@
-import { StyleSheet } from 'react-native';
-
-import { ThemedView } from '@/components/themed-view';
+import ChatScreen from '@/components/chat-screen';
 
 export default function HomeScreen() {
-  return <ThemedView style={styles.container} />;
+  return <ChatScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
