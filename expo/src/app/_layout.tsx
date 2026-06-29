@@ -1,18 +1,18 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
-import { KeyboardAvoidingView, useColorScheme } from 'react-native';
+import { KeyboardAvoidingView, Platform, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useKeyboardBehavior } from '@/hooks/use-keyboard-behavior';
 import { notifications } from '@/services/NotificationService';
 
 function AppTreeWithKeyboardAvoiding() {
-  const behavior = useKeyboardBehavior();
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: 'transparent' }}
-      behavior={behavior}
+      // iOS uses "padding"; Android relies on softwareKeyboardLayoutMode
+      // "resize" (set in app.json) and needs no behavior here.
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}>
       <Stack screenOptions={{ headerShown: false }} />
     </KeyboardAvoidingView>

@@ -16,7 +16,7 @@ import {
 } from '@/services/ChatService';
 
 const ROOM = 'common';
-const USERNAME = 'expo-user';
+const USERNAME = 'A';
 
 function uuid(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID
@@ -24,14 +24,6 @@ function uuid(): string {
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-/**
- * Minimal WhatsApp-style chat screen.
- *
- * Keyboard handling is handled at the root layout (app/_layout.tsx) via a
- * single KeyboardAvoidingView driven by useKeyboardBehavior. This screen
- * therefore only renders the flex column (top bar / list / input) and lets
- * the root KAV shrink the available height when the keyboard appears.
- */
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
