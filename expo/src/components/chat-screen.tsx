@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -26,7 +24,14 @@ function uuid(): string {
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-/** Minimal WhatsApp-style chat screen. */
+/**
+ * Minimal WhatsApp-style chat screen.
+ *
+ * Keyboard handling is handled at the root layout (app/_layout.tsx) via a
+ * single KeyboardAvoidingView driven by useKeyboardBehavior. This screen
+ * therefore only renders the flex column (top bar / list / input) and lets
+ * the root KAV shrink the available height when the keyboard appears.
+ */
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
@@ -62,65 +67,63 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.flex}>
-      {/* Top bar */}
-      <View
-        style={[
-          styles.topBar,
-          {
-            paddingTop: insets.top,
-            height: 56 + insets.top,
-          },
-        ]}>
-        <Pressable
-          hitSlop={8}
-          onPress={() => console.log('back pressed')}
-          style={styles.backButton}>
-          <Text style={styles.backIcon}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} numberOfLines={1}>
-          {ROOM}
-        </Text>
-      </View>
+    <View style={styles.root}>
+      <View style={styles.column}>
+        {/* Top bar */}
+        <View
+          style={[
+            styles.topBar,
+            { paddingTop: insets.top, height: 56 + insets.top },
+          ]}>
+          <Pressable
+            hitSlop={8}
+            onPress={() => console.log('back pressed')}
+            style={styles.backButton}>
+            <Text style={styles.backIcon}>‹</Text>
+          </Pressable>
+          <Text style={styles.title} numberOfLines={1}>
+            {ROOM}
+          </Text>
+        </View>
 
-      {/* Messages */}
-      <FlatList
-        ref={listRef}
-        data={messages}
-        keyExtractor={(m) => m.id}
-        contentContainerStyle={styles.list}
-        onContentSizeChange={() =>
-          listRef.current?.scrollToEnd({ animated: false })
-        }
-        renderItem={({ item }) => {
-          const outgoing = item.username === USERNAME;
-          return (
-            <View
-              style={[styles.bubbleRow, outgoing ? styles.outgoing : styles.incoming]}>
+        {/* Messages */}
+        <FlatList
+          ref={listRef}
+          data={messages}
+          keyExtractor={(m) => m.id}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          onContentSizeChange={() =>
+            listRef.current?.scrollToEnd({ animated: false })
+          }
+          renderItem={({ item }) => {
+            const outgoing = item.username === USERNAME;
+            return (
               <View
                 style={[
-                  styles.bubble,
-                  outgoing ? styles.bubbleOut : styles.bubbleIn,
+                  styles.bubbleRow,
+                  outgoing ? styles.outgoing : styles.incoming,
                 ]}>
-                <Text style={styles.bubbleText}>{item.content}</Text>
-                <Text style={styles.bubbleTime}>
-                  {new Date(item.timestamp).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </Text>
+                <View
+                  style={[
+                    styles.bubble,
+                    outgoing ? styles.bubbleOut : styles.bubbleIn,
+                  ]}>
+                  <Text style={styles.bubbleText}>{item.content}</Text>
+                  <Text style={styles.bubbleTime}>
+                    {new Date(item.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
               </View>
-            </View>
-          );
-        }}
-      />
+            );
+          }}
+        />
 
-      {/* Input bar */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}>
-        <View
-          style={[styles.inputBar, { paddingBottom: insets.bottom || 8 }]}>
+        {/* Input bar */}
+        <View style={[styles.inputBar, { paddingBottom: 8 + insets.bottom }]}>
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -140,7 +143,7 @@ export default function ChatScreen() {
             <Text style={styles.sendIcon}>➤</Text>
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }
@@ -149,37 +152,49 @@ const BUBBLE_OUT = '#d9fdd3';
 const BUBBLE_IN = '#ffffff';
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#ece5dd' },
+  root: { flex: 1, backgroundColor: '#ece5dd' },
+  column: { flex: 1 },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#075e54',
     paddingHorizontal: 4,
   },
-  backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   backIcon: { color: '#fff', fontSize: 32, lineHeight: 34, marginTop: -2 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '600', flex: 1, marginRight: 40 },
-  list: { padding: 12, gap: 6 },
+  title: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 40,
+  },
+  list: { flex: 1 },
+  listContent: { padding: 12, gap: 6 },
   bubbleRow: { flexDirection: 'row', width: '100%' },
   incoming: { justifyContent: 'flex-start' },
   outgoing: { justifyContent: 'flex-end' },
   bubble: { maxWidth: '75%', padding: 6, borderRadius: 12 },
-  bubbleIn: {
-    backgroundColor: BUBBLE_IN,
-    borderBottomLeftRadius: 2,
-  },
-  bubbleOut: {
-    backgroundColor: BUBBLE_OUT,
-    borderBottomRightRadius: 2,
-  },
+  bubbleIn: { backgroundColor: BUBBLE_IN, borderBottomLeftRadius: 2 },
+  bubbleOut: { backgroundColor: BUBBLE_OUT, borderBottomRightRadius: 2 },
   bubbleText: { fontSize: 14, lineHeight: 18 },
-  bubbleTime: { fontSize: 10, color: 'rgba(0,0,0,0.45)', alignSelf: 'flex-end', marginTop: 2 },
+  bubbleTime: {
+    fontSize: 10,
+    color: 'rgba(0,0,0,0.45)',
+    alignSelf: 'flex-end',
+    marginTop: 2,
+  },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 12,
-    paddingTop: 8,
+    paddingVertical: 8,
     backgroundColor: '#f0f2f5',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.08)',

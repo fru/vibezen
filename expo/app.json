@@ -12,6 +12,8 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
+      "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon-adaptive.png",
         "backgroundColor": "#0b1f3a"
