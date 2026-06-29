@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import {
   FlatList,
   Pressable,
@@ -7,7 +8,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  useReanimatedKeyboardAnimation,
+} from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Crypto from 'expo-crypto';
 
 import {
   getMessages,
@@ -18,17 +24,19 @@ import {
 const ROOM = 'common';
 const USERNAME = 'A';
 
-function uuid(): string {
-  return typeof crypto !== 'undefined' && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
+  const { height: keyboardHeight } = useReanimatedKeyboardAnimation();
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [draft, setDraft] = useState('');
-  const listRef = useRef<FlatList<ChatMessageDto>>(null);
+
+  // Spacer below the input bar that fills the navigation-bar inset when the
+  // keyboard is closed and shrinks to 0 as the keyboard rises (in sync with
+  // the IME animation), so there's no dead whitespace above the keyboard.
+  const navBarSpacerStyle = useAnimatedStyle(() => ({
+    // keyboardHeight.value is negative while the keyboard is rising.
+    height: Math.max(0, insets.bottom + keyboardHeight.value),
+  }));
 
   const load = useCallback(async () => {
     try {
@@ -48,7 +56,7 @@ export default function ChatScreen() {
     setDraft('');
     try {
       const msg = await sendMessage(ROOM, {
-        id: uuid(),
+        id: Crypto.randomUUID(),
         username: USERNAME,
         content,
       });
@@ -59,7 +67,7 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior="padding">
       <View style={styles.column}>
         {/* Top bar */}
         <View
@@ -78,16 +86,14 @@ export default function ChatScreen() {
           </Text>
         </View>
 
-        {/* Messages */}
+        {/* Messages — inverted so the latest message is pinned to the
+            bottom and the list stays put during keyboard/layout changes. */}
         <FlatList
-          ref={listRef}
-          data={messages}
+          data={[...messages].reverse()}
           keyExtractor={(m) => m.id}
           style={styles.list}
           contentContainerStyle={styles.listContent}
-          onContentSizeChange={() =>
-            listRef.current?.scrollToEnd({ animated: false })
-          }
+          inverted
           renderItem={({ item }) => {
             const outgoing = item.username === USERNAME;
             return (
@@ -115,7 +121,7 @@ export default function ChatScreen() {
         />
 
         {/* Input bar */}
-        <View style={[styles.inputBar, { paddingBottom: 8 + insets.bottom }]}>
+        <View style={styles.inputBar}>
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -135,8 +141,12 @@ export default function ChatScreen() {
             <Text style={styles.sendIcon}>➤</Text>
           </Pressable>
         </View>
+
+        {/* Animated spacer: fills the nav-bar inset when the keyboard is
+            closed, shrinks to 0 in sync with the keyboard rising. */}
+        <Animated.View style={[styles.navBarSpacer, navBarSpacerStyle]} />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -190,6 +200,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f2f5',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0,0,0,0.08)',
+  },
+  navBarSpacer: {
+    // Matches the chat background so the spacer blends seamlessly
+    // whether the keyboard is open or closed.
+    backgroundColor: 'black',
   },
   input: {
     flex: 1,
